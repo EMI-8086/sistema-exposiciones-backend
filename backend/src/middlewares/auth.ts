@@ -1,5 +1,11 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { supabase } from '../config/supabase';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const supabaseUrl = process.env.SUPABASE_URL!;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
 
 export interface AuthUser {
   id: string;
@@ -13,6 +19,7 @@ export interface AuthUser {
 declare module 'fastify' {
   interface FastifyRequest {
     user?: AuthUser;
+    supabaseClient?: SupabaseClient;
   }
 }
 
@@ -23,13 +30,21 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
   }
 
   const token = authHeader.substring(7);
-  const { data: { user }, error } = await supabase.auth.getUser(token);
+
+  // Crear cliente Supabase con el token del usuario para respetar RLS
+  const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  });
+  request.supabaseClient = supabaseClient;
+
+  // Verificar token con Supabase Auth
+  const { data: { user }, error } = await supabaseClient.auth.getUser(token);
   if (error || !user) {
     return reply.status(401).send({ error: 'No autorizado', message: 'Token inválido' });
   }
 
-  // Obtener rol y datos desde tabla usuarios
-  const { data: usuarioData, error: roleError } = await supabase
+  // Obtener rol y datos desde la tabla 'usuarios' usando el mismo cliente autenticado
+  const { data: usuarioData, error: roleError } = await supabaseClient
     .from('usuarios')
     .select('rol, nombre, apellido, matricula')
     .eq('id_usuario', user.id)
