@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "build": "tsup src/app.ts --clean --out-dir dist --format cjs --platform node",
-  "start": "node dist/app.js",
-  "dev": "tsx watch src/app.ts"
-},
+    "build": "tsup src/app.ts --clean --out-dir dist --format cjs --platform node",
+    "start": "node dist/app.js",
+    "dev": "tsx watch src/app.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

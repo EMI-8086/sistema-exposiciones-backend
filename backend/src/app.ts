@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { authRoutes } from './routes/authRoutes';
@@ -10,7 +13,7 @@ import { evaluacionRoutes } from './routes/evaluacionRoutes';
 
 // Variables de entorno
 const PORT = Number(process.env.PORT) || 8080;
-const FRONTEND_URL = process.env.FRONTEND_URL || '*'; // En Render, define esta variable con la URL de tu frontend
+const FRONTEND_URL = process.env.FRONTEND_URL || '*'; //URL del frontend
 
 const fastify = Fastify({ logger: true });
 
